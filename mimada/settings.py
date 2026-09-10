@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'django.contrib.staticfiles',
     'cloudinary',
+    'anymail',
     # Apps del proyecto Mimada
     'usuarios',
     'catalogo',
@@ -148,13 +149,19 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('BREVO_SMTP_KEY')
+##EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+##EMAIL_HOST = 'smtp.gmail.com'
+##EMAIL_PORT = 587
+##EMAIL_USE_TLS = True
+##EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+##EMAIL_HOST_PASSWORD = config('BREVO_SMTP_KEY')
+
+EMAIL_BACKEND = 'anymail.backends.brevo.EmailBackend'
+ANYMAIL = {
+    'BREVO_API_KEY': config('BREVO_API_KEY'),
+}
 DEFAULT_FROM_EMAIL = 'Mimada 🌸 <mimada.detalles@gmail.com>'
+
 import os
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_URL = '/static/'
