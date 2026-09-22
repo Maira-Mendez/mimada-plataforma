@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 
+
 class CategoriaInventario(models.Model):
     TIPO_CHOICES = [
         ('PRODUCTO_TERMINADO', 'Producto Terminado'),
@@ -34,7 +35,7 @@ class ItemInventario(models.Model):
     imagen = models.ImageField(upload_to='inventario/', blank=True, null=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
-    stock_actual = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[MinValueValidator(0)] )
+    stock_actual = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[MinValueValidator(0)])
     stock_minimo = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[MinValueValidator(0)])
 
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -76,3 +77,33 @@ class RecetaCinta(models.Model):
 
     def __str__(self):
         return f"{self.producto_terminado.nombre} usa {self.metros_por_unidad}m de {self.cinta.nombre}"
+
+
+# ---------------------------------------------------------------------------
+# NUEVO: desglose manual de flores (por color) que se descuenta del
+# inventario al marcar un pedido como LISTO, sin importar si vino del
+# ecommerce o de venta presencial.
+# ---------------------------------------------------------------------------
+
+class DesglosePedidoFlores(models.Model):
+    """Un registro por pedido — evita que si alguien recarga la página o
+    vuelve a enviar el formulario, se descuente el inventario dos veces
+    para el mismo pedido."""
+    pedido_id = models.PositiveIntegerField(unique=True)
+    creado_el = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Desglose de Flores por Pedido"
+        verbose_name_plural = "Desgloses de Flores por Pedido"
+
+    def __str__(self):
+        return f"Desglose del pedido #{self.pedido_id}"
+
+
+class DesgloseFlorItem(models.Model):
+    desglose = models.ForeignKey(DesglosePedidoFlores, on_delete=models.CASCADE, related_name='items')
+    item = models.ForeignKey(ItemInventario, on_delete=models.PROTECT, related_name='desglosado_en')
+    cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.cantidad} × {self.item.nombre}"

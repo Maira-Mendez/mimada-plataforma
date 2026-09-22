@@ -22,6 +22,7 @@ CONTENIDO_ROSAS = {
     'ramo de 6 flores y peluche': 6,
     'cajita hombre reloj': 1,
     'cajita hombre manilla': 1,
+    'caja con billetera': 1,
 }
 
 CONTENIDO_GIRASOLES = {
@@ -349,10 +350,13 @@ def necesidad_flor_semana_siguiente(mapeo_contenido, historial=None, semanas_pro
 def serie_semanal_flor_completa(mapeo_contenido, historial=None):
     """Serie semana a semana SIN huecos de calendario: genera cada semana
     (sábado a sábado, paso de 7 días) desde la primera hasta la última
-    fecha_inicio del historial, excluyendo semanas de fecha comercial.
-    Si una semana no tiene NINGUNA venta registrada (de nada), igual
-    aparece en la serie con valor 0 — se conserva la línea de tiempo
-    real del negocio, sin saltos."""
+    fecha_inicio del historial, INCLUYENDO las semanas de fecha comercial
+    (para no perder la continuidad del eje) pero SIN tomar su historial
+    real — esas semanas se muestran con 0, porque esas ventas fueron
+    "especiales" y no reflejan la tendencia normal. Si una semana no tiene
+    NINGUNA venta registrada (de nada), igual aparece en la serie con
+    valor 0 — se conserva la línea de tiempo real del negocio, sin
+    saltos."""
     registros = _obtener_historial(historial)
     if not registros:
         return []
@@ -375,8 +379,11 @@ def serie_semanal_flor_completa(mapeo_contenido, historial=None):
     serie = []
     actual = primera
     while actual <= ultima:
-        if actual not in fechas_comerciales:
-            serie.append((actual, acumulado.get(actual, Decimal('0'))))
+        # Antes esto se saltaba por completo cuando `actual` era una
+        # semana de fecha comercial, y la barra desaparecía del gráfico.
+        # Ahora se conserva la semana en el eje, solo que con 0 (porque
+        # `acumulado` nunca tiene esa fecha: se excluyó arriba).
+        serie.append((actual, acumulado.get(actual, Decimal('0'))))
         actual += timedelta(days=7)
 
     return serie
@@ -426,3 +433,42 @@ def alerta_stock_flor_semana_siguiente(nombre_flor, dias_entrega_proveedor=3,
         'nivel': nivel, 'mensaje': mensaje, 'necesidad': necesidad,
         'stock_actual': stock_actual, 'faltante': max(faltante, Decimal('0')),
     }
+
+
+# ---------------------------------------------------------------------------
+# NUEVO: para la vista de fechas especiales con flechas.
+# ---------------------------------------------------------------------------
+
+def evento_tiene_historial(mapeos_flores, nombre_fecha_comercial, historial=None):
+    """True si ALGUNA de las flores (rosas/girasoles/lirios) tiene al menos
+    un año de ventas registradas para este evento. Sirve para que un evento
+    sin ninguna venta (p. ej. Halloween) no aparezca al navegar."""
+    registros = _obtener_historial(historial)
+    for mapeo in mapeos_flores:
+        if serie_anual_evento_agregada(mapeo, nombre_fecha_comercial, historial=registros):
+            return True
+    return False
+
+
+def prediccion_evento_en_anio(mapeo_contenido, nombre_fecha_comercial, anio_objetivo, historial=None):
+    """Reconstruye la predicción que el modelo habría dado para
+    `anio_objetivo`, usando SOLO los años anteriores a ese año (nunca el
+    dato real de ese mismo año). Así se puede comparar predicho vs. real
+    incluso después de que la fecha ya pasó, sin haber guardado nada antes."""
+    from .holt import holt_pronostico
+
+    registros = _obtener_historial(historial)
+    serie = serie_anual_evento_agregada(mapeo_contenido, nombre_fecha_comercial, historial=registros)
+    valores_previos = [total for anio, total in serie if anio < anio_objetivo]
+
+    if len(valores_previos) >= 2:
+        resultado = holt_pronostico(valores_previos)
+        return resultado['pronostico'].to_integral_value(rounding=ROUND_CEILING)
+
+    if len(valores_previos) == 1:
+        factor = factor_crecimiento_otras_fechas_flor(mapeo_contenido, excluir_evento=nombre_fecha_comercial, historial=registros)
+        if factor:
+            return (valores_previos[0] * factor).to_integral_value(rounding=ROUND_CEILING)
+        return valores_previos[0].to_integral_value(rounding=ROUND_CEILING)
+
+    return None

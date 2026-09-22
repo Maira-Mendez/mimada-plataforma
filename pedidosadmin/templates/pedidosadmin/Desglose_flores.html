@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Desglose de flores · Pedido #{{ pedido.id }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fdf0f5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2.5rem 1rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      border: 1px solid #F1DDE6;
+      padding: 28px 30px;
+      max-width: 520px;
+      width: 100%;
+    }
+    h1 { font-size: 1.3rem; color: #2E2430; margin-bottom: 4px; }
+    .subtitulo { color: #8C7A85; font-size: 0.85rem; margin-bottom: 22px; }
+
+    .seccion { margin-bottom: 22px; }
+    .seccion h2 {
+      font-size: 0.95rem; color: #9C1249; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: .03em;
+    }
+
+    .fila-rosa {
+      display: flex; gap: 10px; margin-bottom: 8px; align-items: center;
+    }
+    .fila-rosa select, .fila-rosa input, .campo-simple input {
+      border: 1px solid #F1DDE6; border-radius: 10px; padding: 9px 12px;
+      font-size: 0.9rem; font-family: inherit;
+    }
+    .fila-rosa select { flex: 2; }
+    .fila-rosa input { flex: 1; }
+    .fila-rosa button {
+      background: none; border: none; color: #C2185B; font-size: 1.1rem;
+      cursor: pointer; padding: 0 6px;
+    }
+
+    .btn-agregar {
+      background: #FBE0EA; color: #9C1249; border: 1px solid #F8D3E3;
+      border-radius: 10px; padding: 8px 14px; font-size: 0.82rem;
+      cursor: pointer; font-weight: 600;
+    }
+
+    .campo-simple { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .campo-simple label { font-size: 0.88rem; color: #2E2430; }
+    .campo-simple input { width: 100px; text-align: right; }
+
+    .vacio { color: #9A8890; font-size: 0.85rem; font-style: italic; }
+
+    .acciones { display: flex; gap: 12px; margin-top: 26px; }
+    .btn-primario {
+      background: #C2185B; color: #fff; border: none; border-radius: 12px;
+      padding: 11px 20px; font-size: 0.9rem; font-weight: 600; cursor: pointer; flex: 1;
+    }
+    .btn-cancelar {
+      background: none; color: #8C7A85; border: 1px solid #F1DDE6; border-radius: 12px;
+      padding: 11px 20px; font-size: 0.9rem; text-decoration: none; text-align: center; flex: 1;
+    }
+
+    .mensajes { margin-bottom: 16px; }
+    .mensaje { padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 8px; }
+    .mensaje.error { background: #FCE8F0; color: #C2185B; }
+    .mensaje.success { background: #E7F5EC; color: #2F8F5B; }
+    .mensaje.info { background: #F1EAEC; color: #9A8890; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Marcar pedido #{{ pedido.id }} como listo</h1>
+    <p class="subtitulo">Antes de marcarlo, registra qué flores vas a usar para descontarlas del inventario.</p>
+
+    {% if messages %}
+    <div class="mensajes">
+      {% for m in messages %}<div class="mensaje {{ m.tags }}">{{ m }}</div>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <input type="hidden" name="accion" value="marcar_listo">
+
+      <div class="seccion">
+        <h2>Rosas</h2>
+        {% if items_rosas %}
+        <div id="filas-rosas">
+          <div class="fila-rosa">
+            <select name="rosa_item">
+              <option value="">Color…</option>
+              {% for item in items_rosas %}
+              <option value="{{ item.id }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
+              {% endfor %}
+            </select>
+            <input type="number" name="rosa_cantidad" min="0" step="1" placeholder="Cantidad">
+          </div>
+        </div>
+        <button type="button" class="btn-agregar" onclick="agregarFilaRosa()">+ agregar color</button>
+        {% else %}
+        <p class="vacio">No hay rosas por color creadas en Inventario todavía.</p>
+        {% endif %}
+      </div>
+
+      <div class="seccion">
+        <h2>Girasoles</h2>
+        {% if items_girasoles %}
+          {% for item in items_girasoles %}
+          <div class="campo-simple">
+            <label for="item_{{ item.id }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
+            <input type="number" id="item_{{ item.id }}" name="item_{{ item.id }}" min="0" step="1">
+          </div>
+          {% endfor %}
+        {% else %}
+        <p class="vacio">No hay girasoles creados en Inventario todavía.</p>
+        {% endif %}
+      </div>
+
+      <div class="seccion">
+        <h2>Lirios</h2>
+        {% if items_lirios %}
+          {% for item in items_lirios %}
+          <div class="campo-simple">
+            <label for="item_{{ item.id }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
+            <input type="number" id="item_{{ item.id }}" name="item_{{ item.id }}" min="0" step="1">
+          </div>
+          {% endfor %}
+        {% else %}
+        <p class="vacio">No hay lirios creados en Inventario todavía.</p>
+        {% endif %}
+      </div>
+
+      <div class="acciones">
+        <a class="btn-cancelar" href="{{ next }}">Cancelar</a>
+        <button type="submit" class="btn-primario">Descontar y marcar listo</button>
+      </div>
+    </form>
+  </div>
+
+  <template id="plantilla-fila-rosa">
+    <div class="fila-rosa">
+      <select name="rosa_item">
+        <option value="">Color…</option>
+        {% for item in items_rosas %}
+        <option value="{{ item.id }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="rosa_cantidad" min="0" step="1" placeholder="Cantidad">
+      <button type="button" onclick="this.closest('.fila-rosa').remove()">×</button>
+    </div>
+  </template>
+
+  <script>
+    function agregarFilaRosa() {
+      const plantilla = document.getElementById('plantilla-fila-rosa').content.cloneNode(true);
+      document.getElementById('filas-rosas').appendChild(plantilla);
+    }
+  </script>
+</body>
+</html>

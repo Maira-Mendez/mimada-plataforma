@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -241,6 +240,55 @@
       justify-content: center;
     }
 
+    /* ---- NUEVO: sección de fechas especiales, separada de las flores ---- */
+    .evento-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 20px 24px;
+      margin-bottom: 26px;
+      border: 1px solid var(--borde);
+    }
+    .evento-card__nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 4px;
+    }
+    .evento-card__flecha {
+      background: var(--rosa-activo);
+      color: var(--magenta-oscuro);
+      border: 1px solid var(--rosa-suave);
+      border-radius: 50%;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .evento-card__flecha--deshabilitada {
+      visibility: hidden;
+    }
+    .evento-card__titulo {
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--texto);
+      min-width: 220px;
+    }
+    .evento-card__fecha {
+      text-align: center;
+      color: var(--texto-suave);
+      font-size: 0.8rem;
+      margin-bottom: 18px;
+    }
+    .evento-card__vacio {
+      text-align: center;
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+      padding: 10px 0;
+    }
+
     .menu-toggle {
         display: none;
         background: white; border: 1px solid var(--borde); border-radius: 8px;
@@ -343,7 +391,45 @@
       </div>
     </div>
 
+    <!-- ============ FECHAS ESPECIALES (con flechas) ============ -->
+    <div class="evento-card">
+      {% if evento_actual %}
+        <div class="evento-card__nav">
+          {% if nav.anterior %}
+            <a class="evento-card__flecha" href="?evento={{ nav.anterior.nombre|urlencode }}&anio={{ nav.anterior.anio|stringformat:"d" }}">&larr;</a>
+          {% else %}
+            <span class="evento-card__flecha evento-card__flecha--deshabilitada">&larr;</span>
+          {% endif %}
 
+          <div class="evento-card__titulo">{{ evento_actual.nombre }} {{ evento_actual.anio|stringformat:"d" }}</div>
+
+          {% if nav.siguiente %}
+            <a class="evento-card__flecha" href="?evento={{ nav.siguiente.nombre|urlencode }}&anio={{ nav.siguiente.anio|stringformat:"d" }}">&rarr;</a>
+          {% else %}
+            <span class="evento-card__flecha evento-card__flecha--deshabilitada">&rarr;</span>
+          {% endif %}
+        </div>
+        <p class="evento-card__fecha">
+          {{ evento_actual.fecha|date:"d/m/Y" }}
+          {% if evento_actual.es_futuro %} · próxima{% else %} · ya pasó{% endif %}
+        </p>
+
+        <div class="flor-grid flor-grid--evento">
+          {% for flor in evento_actual.flores %}
+          <div class="flor-card">
+            <div class="flor-card__header">
+              <p class="flor-card__titulo">{{ flor.nombre_display }}</p>
+            </div>
+            <div class="flor-card__chart-wrap" style="height: 170px;">
+              <canvas id="chart-evento-{{ flor.clave }}"></canvas>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="evento-card__vacio">Aún no hay ventas registradas en ninguna fecha comercial.</p>
+      {% endif %}
+    </div>
 
     <div class="flor-grid">
       {% for seccion in secciones %}
@@ -363,15 +449,6 @@
         {% if seccion.alerta_semanal.nivel == 'OK' %}✓{% else %}!{% endif %}
       </span>
       <span>{{ seccion.alerta_semanal.mensaje }}</span>
-    </div>
-    {% endif %}
-
-    {% if seccion.tiene_evento %}
-    <p style="font-size:1.0rem; margin: 14px 0 6px;">
-      Historial en {{ nombre_fecha_proxima }}
-    </p>
-    <div class="flor-card__chart-wrap" style="height: 180px;">
-      <canvas id="chart-evento-{{ seccion.clave }}"></canvas>
     </div>
     {% endif %}
 
@@ -406,10 +483,6 @@
       labels: {{ seccion.chart_labels|safe }},
       valores: {{ seccion.chart_valores|safe }},
       indicePrediccion: null,
-      tieneEvento: {{ seccion.tiene_evento|yesno:"true,false" }},
-      eventoLabels: {{ seccion.evento_labels|safe }},
-      eventoValores: {{ seccion.evento_valores|safe }},
-      eventoIndicePrediccion: {{ seccion.evento_indice_prediccion|default_if_none:"null" }},
     },
     {% endfor %}
 ];
@@ -459,21 +532,35 @@
       },
     });
   });
-  seccionesData.forEach(function (s) {
-    if (!s.tieneEvento) return;
+
+  // ---- NUEVO: gráficas de la sección "Fechas especiales" ----
+  const eventoFloresData = [
+    {% if evento_actual %}
+    {% for flor in evento_actual.flores %}
+    {
+      clave: "{{ flor.clave }}",
+      labels: {{ flor.labels|safe }},
+      valores: {{ flor.valores|safe }},
+      indicePrediccion: {{ flor.indice_prediccion|default_if_none:"null" }},
+    },
+    {% endfor %}
+    {% endif %}
+];
+
+  eventoFloresData.forEach(function (s) {
     const canvas = document.getElementById('chart-evento-' + s.clave);
     if (!canvas) return;
 
-    const colores = s.eventoValores.map(function (_, i) {
-      return i === s.eventoIndicePrediccion ? '#C2185B' : '#F8D3E3';
+    const colores = s.valores.map(function (_, i) {
+      return i === s.indicePrediccion ? '#C2185B' : '#F8D3E3';
     });
 
     new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: s.eventoLabels,
+        labels: s.labels,
         datasets: [{
-          data: s.eventoValores,
+          data: s.valores,
           backgroundColor: colores,
           borderRadius: 6,
           maxBarThickness: 40,
@@ -491,9 +578,9 @@
             displayColors: false,
             callbacks: {
               label: function (ctx) {
-                const esPrediccion = ctx.dataIndex === s.eventoIndicePrediccion;
+                const esPrediccion = ctx.dataIndex === s.indicePrediccion;
                 const valor = ctx.parsed.y;
-                return esPrediccion ? 'Proyección: ' + valor : 'Vendidas: ' + valor;
+                return esPrediccion ? 'Predicción: ' + valor : 'Vendidas: ' + valor;
               },
             },
           },
@@ -504,8 +591,7 @@
         },
       },
     });
-});
+  });
 </script>
 </body>
 </html>
-

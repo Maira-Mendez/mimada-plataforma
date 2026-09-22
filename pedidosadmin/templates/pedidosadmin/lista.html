@@ -1,3 +1,4 @@
+{% load l10n %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -197,6 +198,36 @@
             background: #ffebee; color: #c62828; border: 1px solid #ffcdd2;
             border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 1rem;
         }
+
+        /* ===== Desglose de flores dentro del panel de vitrina ===== */
+        .seccion-flores { margin: 1.2rem 0; padding-top: 1rem; border-top: 1px dashed #f0c0d4; }
+        .seccion-flores .titulo-flores {
+            font-size: 12px; font-weight: 700; color: #c2185b; text-transform: uppercase;
+            letter-spacing: 0.04em; margin-bottom: 4px;
+        }
+        .seccion-flores .ayuda-flores { font-size: 11px; color: #999; margin-bottom: 10px; }
+        .subseccion-flor { margin-bottom: 14px; }
+        .subseccion-flor h4 {
+            font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.03em;
+            margin-bottom: 6px;
+        }
+        .fila-rosa { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+        .fila-rosa select, .fila-rosa input { margin-bottom: 0; }
+        .fila-rosa select { flex: 2; }
+        .fila-rosa input { flex: 1; }
+        .fila-rosa button {
+            background: none; border: none; color: #c2185b; font-size: 1.1rem;
+            cursor: pointer; padding: 0 4px;
+        }
+        .btn-agregar-flor {
+            background: #FBE0EA; color: #9C1249; border: 1px solid #F8D3E3;
+            border-radius: 8px; padding: 6px 12px; font-size: 12px;
+            cursor: pointer; font-weight: 600;
+        }
+        .campo-flor-simple { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+        .campo-flor-simple label { font-size: 13px; color: #444; }
+        .campo-flor-simple input { width: 90px; text-align: right; margin-bottom: 0; }
+        .vacio-flores { color: #bbb; font-size: 12px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -463,6 +494,59 @@
                                         {{ form_presencial.fecha_venta }}
                                     </div>
 
+                                    <div class="seccion-flores">
+                                        <div class="titulo-flores">Descontar del inventario</div>
+                                        <div class="ayuda-flores">Opcional — solo si esta venta usó flores del inventario.</div>
+
+                                        <div class="subseccion-flor">
+                                            <h4>Rosas</h4>
+                                            {% if items_rosas %}
+                                            <div id="filas-rosas-vitrina">
+                                                <div class="fila-rosa">
+                                                    <select name="rosa_item" class="form-input">
+                                                        <option value="">Color…</option>
+                                                        {% for item in items_rosas %}
+                                                        <option value="{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <input type="number" name="rosa_cantidad" class="form-input" min="0" step="1" placeholder="Cant.">
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn-agregar-flor" onclick="agregarFilaRosaVitrina()">+ agregar color</button>
+                                            {% else %}
+                                            <p class="vacio-flores">No hay rosas por color creadas en Inventario todavía.</p>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="subseccion-flor">
+                                            <h4>Girasoles</h4>
+                                            {% if items_girasoles %}
+                                                {% for item in items_girasoles %}
+                                                <div class="campo-flor-simple">
+                                                    <label for="vitrina_item_{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
+                                                    <input type="number" id="vitrina_item_{{ item.id|unlocalize }}" name="item_{{ item.id|unlocalize }}" min="0" step="1">
+                                                </div>
+                                                {% endfor %}
+                                            {% else %}
+                                            <p class="vacio-flores">No hay girasoles creados en Inventario todavía.</p>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="subseccion-flor">
+                                            <h4>Lirios</h4>
+                                            {% if items_lirios %}
+                                                {% for item in items_lirios %}
+                                                <div class="campo-flor-simple">
+                                                    <label for="vitrina_item_{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
+                                                    <input type="number" id="vitrina_item_{{ item.id|unlocalize }}" name="item_{{ item.id|unlocalize }}" min="0" step="1">
+                                                </div>
+                                                {% endfor %}
+                                            {% else %}
+                                            <p class="vacio-flores">No hay lirios creados en Inventario todavía.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
                                     <div class="campo-form">
                                         <label>{{ form_presencial.nombre_cliente.label }}</label>
                                         {{ form_presencial.nombre_cliente }}
@@ -477,6 +561,19 @@
                                 </form>
                             </div>
                         </aside>
+
+                        <template id="plantilla-fila-rosa-vitrina">
+                            <div class="fila-rosa">
+                                <select name="rosa_item" class="form-input">
+                                    <option value="">Color…</option>
+                                    {% for item in items_rosas %}
+                                    <option value="{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="number" name="rosa_cantidad" class="form-input" min="0" step="1" placeholder="Cant.">
+                                <button type="button" onclick="this.closest('.fila-rosa').remove()">×</button>
+                            </div>
+                        </template>
                 {% endif %}
             </tbody>
         </table>
@@ -499,5 +596,14 @@
             {% endif %}
         </div>
     </main>
+
+    <script>
+        function agregarFilaRosaVitrina() {
+            const plantilla = document.getElementById('plantilla-fila-rosa-vitrina');
+            if (!plantilla) return;
+            const clon = plantilla.content.cloneNode(true);
+            document.getElementById('filas-rosas-vitrina').appendChild(clon);
+        }
+    </script>
 </body>
 </html>
