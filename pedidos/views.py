@@ -1,6 +1,7 @@
 from urllib.parse import quote
 from datetime import date
 from django.urls import reverse
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -307,6 +308,11 @@ def confirmar_pedido(request):
     if not datos or not items_pedido:
         return redirect("pedidos:inicio")
 
+    # Solo se confirma por POST, con el checkbox de términos marcado.
+    if request.method != "POST" or not request.POST.get("acepta_terminos"):
+        messages.error(request, "Debes aceptar los términos y condiciones para confirmar el pedido.")
+        return redirect("pedidos:resumen")
+
     valor_domicilio = calcular_domicilio(datos["tipo_entrega"])
 
     try:
@@ -362,6 +368,8 @@ def confirmar_pedido(request):
                 hora_entrega=datos["hora_entrega"],
                 valor_domicilio=valor_domicilio,
                 total=total,
+                acepta_terminos=True,
+                fecha_aceptacion_terminos=timezone.now(),
             )
 
             # 4) Crear un DetallePedido por cada ítem (y su ConfiguracionRamo si aplica)

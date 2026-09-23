@@ -121,6 +121,8 @@ def registro_view(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.username = form.cleaned_data['email']  # Usa el correo como username
+            if form.cleaned_data.get('acepta_tratamiento_datos'):
+                user.fecha_aceptacion_tratamiento_datos = timezone.now()
             user.save()
             login(request, user)
             return redirect('home')

@@ -1,5 +1,3 @@
-
-
 # Create your tests here.
 from django.test import TestCase
 from .forms import LoginForm, RegistroForm
@@ -14,6 +12,7 @@ class RegistroFormTest(TestCase):
             'telefono': '3001234567',
             'password1': 'ContraseñaSegura123',
             'password2': 'ContraseñaSegura123',
+            'acepta_tratamiento_datos': True,
         })
         self.assertTrue(form.is_valid())
 
@@ -28,6 +27,7 @@ class RegistroFormTest(TestCase):
             'telefono': '3009999999',
             'password1': 'OtraClave123',
             'password2': 'OtraClave123',
+            'acepta_tratamiento_datos': True,
         })
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
@@ -39,8 +39,21 @@ class RegistroFormTest(TestCase):
             'telefono': '3001112233',
             'password1': 'ClaveUno123',
             'password2': 'ClaveDistinta456',
+            'acepta_tratamiento_datos': True,
         })
         self.assertFalse(form.is_valid())
+
+    def test_registro_rechaza_sin_aceptar_tratamiento_datos(self):
+        form = RegistroForm(data={
+            'first_name': 'Otra Persona',
+            'email': 'nueva@ejemplo.com',
+            'telefono': '3001112233',
+            'password1': 'ContraseñaSegura123',
+            'password2': 'ContraseñaSegura123',
+            # acepta_tratamiento_datos no se envía
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('acepta_tratamiento_datos', form.errors)
 
 
 class LoginFormTest(TestCase):

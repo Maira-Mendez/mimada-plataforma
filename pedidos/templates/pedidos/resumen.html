@@ -66,17 +66,27 @@
     </tr>
 
 </table>
-        <div class="acciones">
 
-            <a href="javascript:history.back()" class="btn-secundario">
-                ← Modificar pedido
-            </a>
+        <form method="post" action="{% url 'pedidos:confirmar_pedido' %}">
+            {% csrf_token %}
+            <div class="campo-checkbox">
+                <input type="checkbox" name="acepta_terminos" id="acepta_terminos" required>
+                <label for="acepta_terminos">
+                    Acepto los
+                    <a href="{% url 'catalogo:nosotros' %}#terminos-condiciones" target="_blank">términos y condiciones</a>
+                    de Mimada.
+                </label>
+            </div>
 
-            <a href="{% url 'pedidos:confirmar_pedido' %}" class="btn-principal">
-                📲 Confirmar pedido
-            </a>
-
-        </div>
+            <div class="acciones">
+                <a href="javascript:history.back()" class="btn-secundario">
+                    ← Modificar pedido
+                </a>
+                <button type="submit" class="btn-principal">
+                    📲 Confirmar pedido
+                </button>
+            </div>
+        </form>
 
     </div>
 
@@ -127,10 +137,26 @@ h1{
     color:#d63384;
 }
 
+.campo-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 28px;
+    font-size: 14px;
+    color: #555;
+}
+.campo-checkbox input[type="checkbox"] {
+    margin-top: 3px;
+}
+.campo-checkbox a {
+    color: #d63384;
+    text-decoration: underline;
+}
+
 .acciones{
     display:flex;
     justify-content:space-between;
-    margin-top:35px;
+    margin-top:20px;
 }
 
 .btn-principal{
@@ -140,6 +166,9 @@ h1{
     padding:14px 28px;
     border-radius:8px;
     font-weight:bold;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
 
 }
 

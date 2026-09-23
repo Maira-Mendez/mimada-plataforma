@@ -96,6 +96,8 @@ class Pedido(models.Model):
         decimal_places=2,
         default=0
     )
+    acepta_terminos = models.BooleanField(default=False)
+    fecha_aceptacion_terminos = models.DateTimeField(null=True, blank=True)
 
     fecha_creacion = models.DateTimeField(
         auto_now_add=True
@@ -111,6 +113,7 @@ class DetallePedido(models.Model):
     cantidad = models.PositiveIntegerField(default=1)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+
 
     def __str__(self):
         return f"Detalle de pedido #{self.pedido_id}"

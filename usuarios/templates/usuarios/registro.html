@@ -129,6 +129,26 @@
             color: #ccc;
             text-align: center;
         }
+        .campo-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 1rem 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .campo-checkbox input[type="checkbox"] {
+            margin-top: 3px;
+        }
+        .campo-checkbox a {
+            color: #c2185b;
+            text-decoration: underline;
+        }
+        .error-checkbox {
+            color: #c2185b;
+            font-size: 12px;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -227,6 +247,16 @@
                         {% for error in form.password2.errors %}{{ error }}{% endfor %}
                     </div>
                 {% endif %}
+            </div>
+            <div class="campo-checkbox">
+              {{ form.acepta_tratamiento_datos }}
+              <label for="{{ form.acepta_tratamiento_datos.id_for_label }}">
+                Autorizo el tratamiento de mis datos personales según lo descrito en la
+                <a href="{% url 'catalogo:nosotros' %}#tratamiento-datos" target="_blank">política de tratamiento de datos</a>
+              </label>
+              {% if form.acepta_tratamiento_datos.errors %}
+                <p class="error-checkbox">{{ form.acepta_tratamiento_datos.errors.0 }}</p>
+              {% endif %}
             </div>
 
             <button type="submit" class="btn-register">

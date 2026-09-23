@@ -37,6 +37,119 @@
         </div>
     </div>
 </section>
+
+<section class="legal-nav">
+    <a href="#tratamiento-datos">Tratamiento de datos</a>
+    <a href="#terminos-condiciones">Términos y condiciones</a>
+</section>
+
+<section id="tratamiento-datos" class="legal-seccion">
+    <h2>Tratamiento de datos personales</h2>
+    <p>
+        En Mimada nos gusta cuidar cada detalle, y eso también incluye tus datos personales.
+        Por eso, esta Política de Tratamiento de Datos Personales explica qué información
+        recopilamos, para qué la utilizamos, cómo la protegemos y cuáles son tus derechos.
+    </p>
+    <p>
+        Esta política se establece de acuerdo con el artículo 15 de la Constitución Política
+        de Colombia, la Ley 1581 de 2012, el Decreto 1074 de 2015 y demás normas aplicables
+        en materia de protección de datos personales:
+    </p>
+    <p>
+        Los datos personales que nos proporcionas al crear una cuenta o realizar
+        un pedido (nombre, dirección, teléfono, correo electrónico, entre otros)
+        serán utilizados únicamente para: procesar y entregar tus pedidos,
+        contactarte sobre el estado de tu compra, y comunicarte novedades o
+        promociones de Mimada, cuando así lo hayas autorizado.
+    </p>
+    <p>
+        Tus datos no serán vendidos ni compartidos con terceros para fines
+        distintos a los aquí descritos, salvo que la ley lo exija. Como titular
+        de tus datos, tienes derecho a conocer, actualizar, rectificar y
+        solicitar la eliminación de tu información en cualquier momento,
+        escribiéndonos a mimada.detalles@gmail.com.
+    </p>
+    <p>
+        Para el funcionamiento de la plataforma, Mimada puede utilizar proveedores
+        tecnológicos externos, por ejemplo, servicios de alojamiento de la
+        aplicación, bases de datos y almacenamiento de imágenes.
+
+        Actualmente, se usan servicios como Railway para el alojamiento de la
+        aplicación y base de datos, y Cloudinary para el almacenamiento de imágenes.
+    </p>
+    <p>
+        En Mimjada creemos que comprar algo bonito no debería significar entregar tus
+        datos sin saber qué hacemos con ellos. Por eso queremos que tengas claro qué
+        información nos das, para qué la usamos y qué puedes hacer con ella.
+
+        Mimada 💗
+        Tus datos también merecen ser tratados con cariño.
+    </p>
+    <p>
+        Al marcar la casilla de aceptación durante el registro, autorizas a
+        Mimada para el tratamiento de tus datos personales conforme a lo aquí
+        descrito.
+    </p>
+</section>
+
+<section id="terminos-condiciones" class="legal-seccion">
+    <h2>Condiciones de compra</h2>
+    <p>
+        ¡Hola! 💕 Bienvenid@ a Mimada. Nos encanta crear detalles que hagan
+        sonreír, sorprender y decir "ay, qué lindo". Para que tu experiencia
+        sea igual de bonita de principio a fin, aquí te contamos algunas
+        reglas importantes. Al realizar un pedido con Mimada, entendemos que
+        has leído y aceptado estos términos y condiciones.
+    </p>
+
+    <h3>1. Pedidos</h3>
+    <p>
+        Todos los pedidos deben realizarse con al menos 48 horas de
+        anticipación; en fechas comerciales es mejor con 3-4 días de
+        anticipación, con el fin de garantizar la realización de tu detalle.
+    </p>
+
+    <h3>2. Confirmación</h3>
+    <p>
+        Para confirmar, es necesario un abono mínimo, el cual es informado al
+        momento de confirmar el pedido. El saldo se paga al momento de la
+        entrega o recogida. El pedido solo comienza a elaborarse una vez
+        recibido el abono y enviado el comprobante de pago.
+    </p>
+
+    <h3>3. Cancelaciones</h3>
+    <p>
+        El anticipo no es reembolsable en caso de que el cliente decida
+        cancelar el pedido. Esto se debe a que, una vez confirmado, podemos
+        realizar la compra de materiales, insumos y elementos necesarios para
+        su elaboración.
+    </p>
+
+    <h3>4. Entregas y horarios</h3>
+    <p>
+        Las entregas a domicilio tienen un costo adicional de $10.000. Las
+        entregas se hacen en un rango de horas, esto previendo tráfico o
+        situaciones externas con el entregador. Si el destinatario no se
+        encuentra disponible al momento de la entrega, el pedido deberá ser
+        reprogramado para una nueva fecha y se cobrará nuevamente el valor
+        del domicilio.
+    </p>
+
+    <h3>5. Productos artesanales</h3>
+    <p>
+        Algunos de nuestros productos son elaborados artesanalmente, por lo
+        que pueden existir pequeñas diferencias entre las fotografías y el
+        producto final. Esto no significa que algo haya salido mal. Los
+        colores, tamaños, cantidades y disponibilidad pueden variar
+        dependiendo de los materiales existentes.
+    </p>
+
+    <p class="legal-firma">
+        Atentamente,<br>
+        Maira Méndez<br>
+        <strong>Propietaria</strong>
+    </p>
+</section>
 {% endblock %}
 
 {% block extra_style %}
@@ -96,5 +209,67 @@
     .mision-vision { padding: 2.5rem 1.2rem; }
     .mision-vision-grid { grid-template-columns: 1fr; }
     .mv-logo { width: 110px; }
+}
+
+/* ---- NUEVO: navegación e índice legal + secciones ---- */
+.legal-nav {
+    max-width: 1100px;
+    margin: 0 auto 1rem;
+    padding: 0 1.5rem;
+    display: flex;
+    gap: 1.2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.legal-nav a {
+    color: #c2185b;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid #f0c0d4;
+    padding-bottom: 2px;
+}
+.legal-nav a:hover {
+    border-bottom-color: #c2185b;
+}
+
+.legal-seccion {
+    max-width: 800px;
+    margin: 0 auto 2.5rem;
+    padding: 2rem 1.8rem;
+    background: #fff7fa;
+    border: 1px solid #f0c0d4;
+    border-radius: 14px;
+    scroll-margin-top: 20px;
+}
+.legal-seccion h2 {
+    color: #c2185b;
+    font-size: 1.15rem;
+    font-family: Georgia, serif;
+    margin: 0 0 1rem;
+}
+.legal-seccion p {
+    font-size: 13.5px;
+    color: #666;
+    line-height: 1.7;
+    margin: 0 0 0.9rem;
+}
+.legal-seccion p:last-child {
+    margin-bottom: 0;
+}
+.legal-seccion h3 {
+    color: #9C1249;
+    font-size: 0.95rem;
+    margin: 1.3rem 0 0.4rem;
+}
+.legal-seccion h3:first-of-type {
+    margin-top: 0.4rem;
+}
+.legal-firma {
+    margin-top: 1.4rem;
+    color: #9C1249 !important;
+}
+.legal-firma strong {
+    color: #c2185b;
 }
 {% endblock %}

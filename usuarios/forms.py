@@ -42,10 +42,18 @@ class RegistroForm(UserCreationForm):
             'class': 'form-input'
         })
     )
+    acepta_tratamiento_datos = forms.BooleanField(
+        required=True,
+        label='Autorizo el tratamiento de mis datos personales',
+        error_messages={
+            'required': 'Debes autorizar el tratamiento de datos para crear tu cuenta.'
+        },
+        widget=forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
+    )
 
     class Meta:
         model = Usuario
-        fields = ['first_name', 'email', 'telefono', 'password1', 'password2']
+        fields = ['first_name', 'email', 'telefono', 'password1', 'password2', 'acepta_tratamiento_datos']
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
