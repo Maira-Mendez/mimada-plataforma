@@ -1,7 +1,6 @@
 from datetime import timedelta
-from django.db.models import F
 from .models import HistorialVentas
-from .fechas_comerciales import detectar_fecha_comercial
+from .fechas_comerciales import es_dia_comercial
 
 #    mapea nombres reales del catálogo -> nombre histórico en el Excel
 ALIAS_PRODUCTOS = {
@@ -27,13 +26,21 @@ def registrar_venta(producto, cantidad, fecha):
 
     fecha_inicio = inicio_de_semana(fecha)
     fecha_fin = fecha_inicio + timedelta(days=6)
-    comercial = detectar_fecha_comercial(fecha_inicio, fecha_fin)
+    # Día exacto de la venta contra el día exacto del evento — no el rango
+    # completo de la semana (mismo criterio que pedidosadmin/views.py).
+    comercial = es_dia_comercial(fecha)
 
+    # comercial va DENTRO de la búsqueda del get_or_create (no solo en
+    # defaults): así una venta del día del evento y una venta de otro día
+    # de la MISMA semana, del mismo producto, quedan en filas separadas
+    # en vez de mezclarse en una sola fila que arrastra la marca de
+    # evento para siempre.
     registro, creado = HistorialVentas.objects.get_or_create(
         producto=producto,
         fecha_inicio=fecha_inicio,
-        fecha_fin=fecha_fin,
-        defaults={'cantidad': cantidad, 'fecha_comercial': comercial}
+        fecha_comercial=comercial,
+        defaults={'fecha_fin': fecha_fin, 'cantidad': cantidad},
     )
     if not creado:
-        HistorialVentas.objects.filter(pk=registro.pk).update(cantidad=F('cantidad') + cantidad)
+        registro.cantidad += cantidad
+        registro.save(update_fields=['cantidad'])

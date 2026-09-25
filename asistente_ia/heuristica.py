@@ -350,13 +350,13 @@ def necesidad_flor_semana_siguiente(mapeo_contenido, historial=None, semanas_pro
 def serie_semanal_flor_completa(mapeo_contenido, historial=None):
     """Serie semana a semana SIN huecos de calendario: genera cada semana
     (sábado a sábado, paso de 7 días) desde la primera hasta la última
-    fecha_inicio del historial, INCLUYENDO las semanas de fecha comercial
-    (para no perder la continuidad del eje) pero SIN tomar su historial
-    real — esas semanas se muestran con 0, porque esas ventas fueron
-    "especiales" y no reflejan la tendencia normal. Si una semana no tiene
-    NINGUNA venta registrada (de nada), igual aparece en la serie con
-    valor 0 — se conserva la línea de tiempo real del negocio, sin
-    saltos."""
+    fecha_inicio del historial. Solo se excluyen las FILAS marcadas como
+    fecha comercial (una venta puntual del día del evento), no la semana
+    completa — así una semana que tuvo tanto ventas de evento como ventas
+    normales en otros días sigue apareciendo, con solo lo normal sumado.
+    Si una semana no tiene ninguna venta normal, igual aparece en la
+    serie con valor 0 — se conserva la línea de tiempo real del negocio,
+    sin saltos."""
     registros = _obtener_historial(historial)
     if not registros:
         return []
@@ -366,11 +366,9 @@ def serie_semanal_flor_completa(mapeo_contenido, historial=None):
     semana_actual = inicio_semana(date.today())
     ultima = max(todas_fechas[-1], semana_actual)
 
-    fechas_comerciales = {r.fecha_inicio for r in registros if r.fecha_comercial not in (None, '')}
-
     acumulado = {}
     for r in registros:
-        if r.fecha_inicio in fechas_comerciales:
+        if r.fecha_comercial not in (None, ''):
             continue
         factor = mapeo_contenido.get(r.producto.strip().lower())
         if factor:
@@ -379,10 +377,6 @@ def serie_semanal_flor_completa(mapeo_contenido, historial=None):
     serie = []
     actual = primera
     while actual <= ultima:
-        # Antes esto se saltaba por completo cuando `actual` era una
-        # semana de fecha comercial, y la barra desaparecía del gráfico.
-        # Ahora se conserva la semana en el eje, solo que con 0 (porque
-        # `acumulado` nunca tiene esa fecha: se excluyó arriba).
         serie.append((actual, acumulado.get(actual, Decimal('0'))))
         actual += timedelta(days=7)
 

@@ -242,33 +242,35 @@ def obtener_cliente_mostrador():
     return cliente
 
 
-
-
-
 def registrar_en_historial(nombre_producto, cantidad, fecha_venta):
     """Suma esta venta a la semana correspondiente de HistorialVentas,
     para que el Asistente IA la vea en la próxima predicción."""
     fecha_inicio = inicio_semana(fecha_venta)
-    fecha_fin = fecha_inicio + timedelta(days=7)
+    fecha_fin = fecha_inicio + timedelta(days=6)
     # Día exacto de la venta contra el día exacto del evento — no el rango
     # completo de la semana. Así una venta de un día cualquiera de la
     # semana no se contamina solo porque esa semana también contiene un
     # evento comercial en otro día.
     fecha_comercial = es_dia_comercial(fecha_venta)
 
+    # fecha_comercial va DENTRO de la búsqueda (no solo en defaults): así
+    # una venta del día del evento y una venta de otro día de la MISMA
+    # semana, para el mismo producto, quedan en filas separadas en vez de
+    # mezclarse en una sola fila que arrastra la marca de evento para
+    # siempre (ese mezclado era el bug: una vez la fila quedaba marcada
+    # como evento, cualquier venta normal posterior de esa semana se
+    # sumaba ahí mismo y desaparecía de las barras normales).
     registro, creado = HistorialVentas.objects.get_or_create(
         producto=nombre_producto,
         fecha_inicio=fecha_inicio,
+        fecha_comercial=fecha_comercial,
         defaults={
             'fecha_fin': fecha_fin,
             'cantidad': cantidad,
-            'fecha_comercial': fecha_comercial,
         },
     )
     if not creado:
         registro.cantidad += cantidad
-        if not registro.fecha_comercial and fecha_comercial:
-            registro.fecha_comercial = fecha_comercial
         registro.save()
 
     return registro
