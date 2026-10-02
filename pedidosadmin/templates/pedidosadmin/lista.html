@@ -332,252 +332,253 @@
                 {% empty %}
                 <tr><td colspan="7" style="text-align:center; color:#999; padding:2rem;">No hay pedidos todavía.</td></tr>
                 {% endfor %}
-
-                {% if pedido_detalle %}
-                        <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="overlay abierto"></a>
-
-                        <aside class="panel-detalle abierto">
-                            <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="panel-close">✕</a>
-                            <div class="panel-card">
-                                <h2 style="font-size:18px; color:#333;">Detalle de Pedido
-                                    <span class="badge {{ pedido_detalle.estado }}">{{ pedido_detalle.get_estado_display }}</span>
-                                </h2>
-
-                                <div class="total-row">
-                                    <span class="orden">order-{{ pedido_detalle.id }}</span>
-                                    <span class="valor">${{ pedido_detalle.total|floatformat:0 }}</span>
-                                </div>
-
-                                <h3 class="seccion">Cliente</h3>
-                                <div class="cliente-box">
-                                    <div class="cliente-avatar">{{ pedido_detalle.cliente.first_name|default:pedido_detalle.cliente.username|slice:":1"|upper }}</div>
-                                    <div>
-                                        <div class="nombre">{{ pedido_detalle.cliente.get_full_name|default:pedido_detalle.cliente.username }}</div>
-                                        <div class="contacto">{{ pedido_detalle.cliente.email }} · {{ pedido_detalle.cliente.telefono|default:"Sin teléfono" }}</div>
-                                    </div>
-                                </div>
-
-                                {% if pedido_detalle.es_regalo %}
-                                <h3 class="seccion">Es un regalo {% if pedido_detalle.entrega_anonima %}(entrega anónima){% endif %}</h3>
-                                <div class="direccion">
-                                    Destinatario: {{ pedido_detalle.nombre_destinatario|default:"—" }}<br>
-                                    Teléfono: {{ pedido_detalle.telefono_destinatario|default:"—" }}
-                                </div>
-                                {% endif %}
-
-                                <h3 class="seccion">Productos adquiridos</h3>
-                                {% for detalle in pedido_detalle.detalles.all %}
-                                <div class="producto-row">
-                                    <div style="display:flex; align-items:center; gap:10px;">
-                                        {% if detalle.producto.imagen %}
-                                        <img src="{{ detalle.producto.imagen.url }}" alt="{{ detalle.producto.nombre }}"
-                                             style="width:40px; height:40px; border-radius:8px; object-fit:cover; background:#fce4ec;">
-                                        {% else %}
-                                        <div style="width:40px; height:40px; border-radius:8px; background:#fce4ec; display:flex; align-items:center; justify-content:center; font-size:16px;">🌸</div>
-                                        {% endif %}
-                                        <div>
-                                            <div class="nombre">{{ detalle.producto.nombre|default:"Ramo personalizado" }}</div>
-                                            <div class="detalle">Cantidad: {{ detalle.cantidad }}
-                                                {% if detalle.es_personalizado and detalle.configuracion %}
-                                                    · {{ detalle.configuracion.cantidad_rosas }} rosas
-                                                    {% if detalle.configuracion.color_rosa %}({{ detalle.configuracion.color_rosa.nombre }}){% endif %}
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>${{ detalle.subtotal|floatformat:0 }}</div>
-                                </div>
-                                {% empty %}
-                                <p style="color:#999; font-size:13px;">Sin productos registrados.</p>
-                                {% endfor %}
-
-                                <h3 class="seccion">Información de entrega</h3>
-                                <div class="entrega-info">
-                                    <div><span>Tipo</span>{{ pedido_detalle.get_tipo_entrega_display }}</div>
-                                    <div><span>Fecha</span>{{ pedido_detalle.fecha_entrega|date:"d/m/Y"|default:"Sin definir" }}</div>
-                                    <div><span>Horario</span>{{ pedido_detalle.hora_entrega|default:"Sin definir" }}</div>
-                                </div>
-                                {% if pedido_detalle.tipo_entrega == 'DOMICILIO' %}
-                                <div class="direccion">
-                                    {{ pedido_detalle.direccion }}{% if pedido_detalle.barrio %}, {{ pedido_detalle.barrio }}{% endif %}, {{ pedido_detalle.ciudad }}
-                                    {% if pedido_detalle.referencia %}<br><span style="color:#999;">Ref: {{ pedido_detalle.referencia }}</span>{% endif %}
-                                </div>
-                                {% endif %}
-
-                                {% if pedido_detalle.mensaje %}
-                                <div class="nota-cliente"> "{{ pedido_detalle.mensaje }}"</div>
-                                {% endif %}
-
-                                <div class="acciones">
-                                    {% with next_url="?tab="|add:tab_activo|add:"&q="|add:query|add:"&page="|add:page_obj.number|add:"&ver="|add:pedido_detalle.id %}
-                                    {% if pedido_detalle.estado == 'PENDIENTE' or pedido_detalle.estado == 'CONFIRMADO' %}
-                                    <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="accion" value="aprobar">
-                                        <input type="hidden" name="next" value="{{ next_url }}">
-                                        <button type="submit" class="btn-primary-full">Aprobar y Enviar a Producción</button>
-                                    </form>
-                                    {% elif pedido_detalle.estado == 'EN_PROCESO' %}
-                                    <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="accion" value="marcar_listo">
-                                        <input type="hidden" name="next" value="{{ next_url }}">
-                                        <button type="submit" class="btn-primary-full">Marcar como Listo</button>
-                                    </form>
-                                    {% elif pedido_detalle.estado == 'LISTO' %}
-                                    <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="accion" value="entregar">
-                                        <input type="hidden" name="next" value="{{ next_url }}">
-                                        <button type="submit" class="btn-primary-full">Marcar como Entregado</button>
-                                    </form>
-                                    {% endif %}
-
-                                    {% if pedido_detalle.estado != 'ENTREGADO' and pedido_detalle.estado != 'CANCELADO' %}
-                                    <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="accion" value="cancelar">
-                                        <input type="hidden" name="next" value="{{ next_url }}">
-                                        <button type="submit" class="btn-danger-full">Cancelar Pedido</button>
-                                    </form>
-                                    {% endif %}
-                                    {% endwith %}
-                                </div>
-                            </div>
-                        </aside>
-                {% endif %}
-
-                {% if mostrar_form_presencial %}
-                        <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="overlay abierto"></a>
-
-                        <aside class="panel-detalle abierto">
-                            <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="panel-close">✕</a>
-                            <div class="panel-card">
-                                <h2 style="font-size:18px; color:#333; margin-bottom: 1rem;">Registrar venta de vitrina</h2>
-
-                                {% if form_presencial.non_field_errors %}
-                                <div class="errores-form">
-                                    {% for error in form_presencial.non_field_errors %}{{ error }}{% endfor %}
-                                </div>
-                                {% endif %}
-
-                                <form method="post" action="{% url 'pedidosadmin:registrar_presencial' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="next" value="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}">
-
-                                    <div class="campo-form">
-                                        <label>{{ form_presencial.producto.label }}</label>
-                                        {{ form_presencial.producto }}
-                                    </div>
-
-                                    <div class="separador-o">— o —</div>
-
-                                    <div class="campo-form">
-                                        <label>{{ form_presencial.producto_nombre_libre.label }}</label>
-                                        {{ form_presencial.producto_nombre_libre }}
-                                        <div class="ayuda">{{ form_presencial.producto_nombre_libre.help_text }}</div>
-                                    </div>
-
-                                    <div class="campo-form">
-                                        <label>{{ form_presencial.cantidad.label }}</label>
-                                        {{ form_presencial.cantidad }}
-                                    </div>
-
-                                    <div class="campo-form">
-                                        <label>{{ form_presencial.precio_unitario.label }}</label>
-                                        {{ form_presencial.precio_unitario }}
-                                        <div class="ayuda">{{ form_presencial.precio_unitario.help_text }}</div>
-                                    </div>
-
-                                    <div class="campo-form">
-                                        <label>{{ form_presencial.fecha_venta.label }}</label>
-                                        {{ form_presencial.fecha_venta }}
-                                    </div>
-
-                                    <div class="seccion-flores">
-                                        <div class="titulo-flores">Descontar del inventario</div>
-                                        <div class="ayuda-flores">Opcional — solo si esta venta usó flores del inventario.</div>
-
-                                        <div class="subseccion-flor">
-                                            <h4>Rosas</h4>
-                                            {% if items_rosas %}
-                                            <div id="filas-rosas-vitrina">
-                                                <div class="fila-rosa">
-                                                    <select name="rosa_item" class="form-input">
-                                                        <option value="">Color…</option>
-                                                        {% for item in items_rosas %}
-                                                        <option value="{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                    <input type="number" name="rosa_cantidad" class="form-input" min="0" step="1" placeholder="Cant.">
-                                                </div>
-                                            </div>
-                                            <button type="button" class="btn-agregar-flor" onclick="agregarFilaRosaVitrina()">+ agregar color</button>
-                                            {% else %}
-                                            <p class="vacio-flores">No hay rosas por color creadas en Inventario todavía.</p>
-                                            {% endif %}
-                                        </div>
-
-                                        <div class="subseccion-flor">
-                                            <h4>Girasoles</h4>
-                                            {% if items_girasoles %}
-                                                {% for item in items_girasoles %}
-                                                <div class="campo-flor-simple">
-                                                    <label for="vitrina_item_{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
-                                                    <input type="number" id="vitrina_item_{{ item.id|unlocalize }}" name="item_{{ item.id|unlocalize }}" min="0" step="1">
-                                                </div>
-                                                {% endfor %}
-                                            {% else %}
-                                            <p class="vacio-flores">No hay girasoles creados en Inventario todavía.</p>
-                                            {% endif %}
-                                        </div>
-
-                                        <div class="subseccion-flor">
-                                            <h4>Lirios</h4>
-                                            {% if items_lirios %}
-                                                {% for item in items_lirios %}
-                                                <div class="campo-flor-simple">
-                                                    <label for="vitrina_item_{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
-                                                    <input type="number" id="vitrina_item_{{ item.id|unlocalize }}" name="item_{{ item.id|unlocalize }}" min="0" step="1">
-                                                </div>
-                                                {% endfor %}
-                                            {% else %}
-                                            <p class="vacio-flores">No hay lirios creados en Inventario todavía.</p>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-
-                                    <div class="campo-form">
-                                        <label>{{ form_presencial.nombre_cliente.label }}</label>
-                                        {{ form_presencial.nombre_cliente }}
-                                    </div>
-
-                                    <div class="campo-form">
-                                        <label>{{ form_presencial.telefono_cliente.label }}</label>
-                                        {{ form_presencial.telefono_cliente }}
-                                    </div>
-
-                                    <button type="submit" class="btn-primary-full">Registrar venta</button>
-                                </form>
-                            </div>
-                        </aside>
-
-                        <template id="plantilla-fila-rosa-vitrina">
-                            <div class="fila-rosa">
-                                <select name="rosa_item" class="form-input">
-                                    <option value="">Color…</option>
-                                    {% for item in items_rosas %}
-                                    <option value="{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
-                                    {% endfor %}
-                                </select>
-                                <input type="number" name="rosa_cantidad" class="form-input" min="0" step="1" placeholder="Cant.">
-                                <button type="button" onclick="this.closest('.fila-rosa').remove()">×</button>
-                            </div>
-                        </template>
-                {% endif %}
             </tbody>
         </table>
         </div>
+
+        {% if pedido_detalle %}
+                <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="overlay abierto"></a>
+
+                <aside class="panel-detalle abierto">
+                    <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="panel-close">✕</a>
+                    <div class="panel-card">
+                        <h2 style="font-size:18px; color:#333;">Detalle de Pedido
+                            <span class="badge {{ pedido_detalle.estado }}">{{ pedido_detalle.get_estado_display }}</span>
+                        </h2>
+
+                        <div class="total-row">
+                            <span class="orden">order-{{ pedido_detalle.id }}</span>
+                            <span class="valor">${{ pedido_detalle.total|floatformat:0 }}</span>
+                        </div>
+
+                        <h3 class="seccion">Cliente</h3>
+                        <div class="cliente-box">
+                            <div class="cliente-avatar">{{ pedido_detalle.cliente.first_name|default:pedido_detalle.cliente.username|slice:":1"|upper }}</div>
+                            <div>
+                                <div class="nombre">{{ pedido_detalle.cliente.get_full_name|default:pedido_detalle.cliente.username }}</div>
+                                <div class="contacto">{{ pedido_detalle.cliente.email }} · {{ pedido_detalle.cliente.telefono|default:"Sin teléfono" }}</div>
+                            </div>
+                        </div>
+
+                        {% if pedido_detalle.es_regalo %}
+                        <h3 class="seccion">Es un regalo {% if pedido_detalle.entrega_anonima %}(entrega anónima){% endif %}</h3>
+                        <div class="direccion">
+                            Destinatario: {{ pedido_detalle.nombre_destinatario|default:"—" }}<br>
+                            Teléfono: {{ pedido_detalle.telefono_destinatario|default:"—" }}
+                        </div>
+                        {% endif %}
+
+                        <h3 class="seccion">Productos adquiridos</h3>
+                        {% for detalle in pedido_detalle.detalles.all %}
+                        <div class="producto-row">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                {% if detalle.producto.imagen %}
+                                <img src="{{ detalle.producto.imagen.url }}" alt="{{ detalle.producto.nombre }}"
+                                     style="width:40px; height:40px; border-radius:8px; object-fit:cover; background:#fce4ec;">
+                                {% else %}
+                                <div style="width:40px; height:40px; border-radius:8px; background:#fce4ec; display:flex; align-items:center; justify-content:center; font-size:16px;">🌸</div>
+                                {% endif %}
+                                <div>
+                                    <div class="nombre">{{ detalle.producto.nombre|default:"Ramo personalizado" }}</div>
+                                    <div class="detalle">Cantidad: {{ detalle.cantidad }}
+                                        {% if detalle.es_personalizado and detalle.configuracion %}
+                                            · {{ detalle.configuracion.cantidad_rosas }} rosas
+                                            {% if detalle.configuracion.color_rosa %}({{ detalle.configuracion.color_rosa.nombre }}){% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>${{ detalle.subtotal|floatformat:0 }}</div>
+                        </div>
+                        {% empty %}
+                        <p style="color:#999; font-size:13px;">Sin productos registrados.</p>
+                        {% endfor %}
+
+                        <h3 class="seccion">Información de entrega</h3>
+                        <div class="entrega-info">
+                            <div><span>Tipo</span>{{ pedido_detalle.get_tipo_entrega_display }}</div>
+                            <div><span>Fecha</span>{{ pedido_detalle.fecha_entrega|date:"d/m/Y"|default:"Sin definir" }}</div>
+                            <div><span>Horario</span>{{ pedido_detalle.hora_entrega|default:"Sin definir" }}</div>
+                        </div>
+                        {% if pedido_detalle.tipo_entrega == 'DOMICILIO' %}
+                        <div class="direccion">
+                            {{ pedido_detalle.direccion }}{% if pedido_detalle.barrio %}, {{ pedido_detalle.barrio }}{% endif %}, {{ pedido_detalle.ciudad }}
+                            {% if pedido_detalle.referencia %}<br><span style="color:#999;">Ref: {{ pedido_detalle.referencia }}</span>{% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if pedido_detalle.mensaje %}
+                        <div class="nota-cliente"> "{{ pedido_detalle.mensaje }}"</div>
+                        {% endif %}
+
+                        <div class="acciones">
+                            {% with next_url="?tab="|add:tab_activo|add:"&q="|add:query|add:"&page="|add:page_obj.number|add:"&ver="|add:pedido_detalle.id %}
+                            {% if pedido_detalle.estado == 'PENDIENTE' or pedido_detalle.estado == 'CONFIRMADO' %}
+                            <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="aprobar">
+                                <input type="hidden" name="next" value="{{ next_url }}">
+                                <button type="submit" class="btn-primary-full">Aprobar y Enviar a Producción</button>
+                            </form>
+                            {% elif pedido_detalle.estado == 'EN_PROCESO' %}
+                            <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="marcar_listo">
+                                <input type="hidden" name="next" value="{{ next_url }}">
+                                <button type="submit" class="btn-primary-full">Marcar como Listo</button>
+                            </form>
+                            {% elif pedido_detalle.estado == 'LISTO' %}
+                            <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="entregar">
+                                <input type="hidden" name="next" value="{{ next_url }}">
+                                <button type="submit" class="btn-primary-full">Marcar como Entregado</button>
+                            </form>
+                            {% endif %}
+
+                            {% if pedido_detalle.estado != 'ENTREGADO' and pedido_detalle.estado != 'CANCELADO' %}
+                            <form method="post" action="{% url 'pedidosadmin:accion' pedido_detalle.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="accion" value="cancelar">
+                                <input type="hidden" name="next" value="{{ next_url }}">
+                                <button type="submit" class="btn-danger-full">Cancelar Pedido</button>
+                            </form>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </aside>
+        {% endif %}
+
+        {% if mostrar_form_presencial %}
+                <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="overlay abierto"></a>
+
+                <aside class="panel-detalle abierto">
+                    <a href="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}" class="panel-close">✕</a>
+                    <div class="panel-card">
+                        <h2 style="font-size:18px; color:#333; margin-bottom: 1rem;">Registrar venta de vitrina</h2>
+
+                        {% if form_presencial.non_field_errors %}
+                        <div class="errores-form">
+                            {% for error in form_presencial.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <form method="post" action="{% url 'pedidosadmin:registrar_presencial' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="?tab={{ tab_activo }}&q={{ query }}&page={{ page_obj.number }}">
+
+                            <div class="campo-form">
+                                <label>{{ form_presencial.producto.label }}</label>
+                                {{ form_presencial.producto }}
+                            </div>
+
+                            <div class="separador-o">— o —</div>
+
+                            <div class="campo-form">
+                                <label>{{ form_presencial.producto_nombre_libre.label }}</label>
+                                {{ form_presencial.producto_nombre_libre }}
+                                <div class="ayuda">{{ form_presencial.producto_nombre_libre.help_text }}</div>
+                            </div>
+
+                            <div class="campo-form">
+                                <label>{{ form_presencial.cantidad.label }}</label>
+                                {{ form_presencial.cantidad }}
+                            </div>
+
+                            <div class="campo-form">
+                                <label>{{ form_presencial.precio_unitario.label }}</label>
+                                {{ form_presencial.precio_unitario }}
+                                <div class="ayuda">{{ form_presencial.precio_unitario.help_text }}</div>
+                            </div>
+
+                            <div class="campo-form">
+                                <label>{{ form_presencial.fecha_venta.label }}</label>
+                                {{ form_presencial.fecha_venta }}
+                            </div>
+
+                            <div class="seccion-flores">
+                                <div class="titulo-flores">Descontar del inventario</div>
+                                <div class="ayuda-flores">Opcional — solo si esta venta usó flores del inventario.</div>
+
+                                <div class="subseccion-flor">
+                                    <h4>Rosas</h4>
+                                    {% if items_rosas %}
+                                    <div id="filas-rosas-vitrina">
+                                        <div class="fila-rosa">
+                                            <select name="rosa_item" class="form-input">
+                                                <option value="">Color…</option>
+                                                {% for item in items_rosas %}
+                                                <option value="{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
+                                                {% endfor %}
+                                            </select>
+                                            <input type="number" name="rosa_cantidad" class="form-input" min="0" step="1" placeholder="Cant.">
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-agregar-flor" onclick="agregarFilaRosaVitrina()">+ agregar color</button>
+                                    {% else %}
+                                    <p class="vacio-flores">No hay rosas por color creadas en Inventario todavía.</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="subseccion-flor">
+                                    <h4>Girasoles</h4>
+                                    {% if items_girasoles %}
+                                        {% for item in items_girasoles %}
+                                        <div class="campo-flor-simple">
+                                            <label for="vitrina_item_{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
+                                            <input type="number" id="vitrina_item_{{ item.id|unlocalize }}" name="item_{{ item.id|unlocalize }}" min="0" step="1">
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                    <p class="vacio-flores">No hay girasoles creados en Inventario todavía.</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="subseccion-flor">
+                                    <h4>Lirios</h4>
+                                    {% if items_lirios %}
+                                        {% for item in items_lirios %}
+                                        <div class="campo-flor-simple">
+                                            <label for="vitrina_item_{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</label>
+                                            <input type="number" id="vitrina_item_{{ item.id|unlocalize }}" name="item_{{ item.id|unlocalize }}" min="0" step="1">
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                    <p class="vacio-flores">No hay lirios creados en Inventario todavía.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="campo-form">
+                                <label>{{ form_presencial.nombre_cliente.label }}</label>
+                                {{ form_presencial.nombre_cliente }}
+                            </div>
+
+                            <div class="campo-form">
+                                <label>{{ form_presencial.telefono_cliente.label }}</label>
+                                {{ form_presencial.telefono_cliente }}
+                            </div>
+
+                            <button type="submit" class="btn-primary-full">Registrar venta</button>
+                        </form>
+                    </div>
+                </aside>
+
+                <template id="plantilla-fila-rosa-vitrina">
+                    <div class="fila-rosa">
+                        <select name="rosa_item" class="form-input">
+                            <option value="">Color…</option>
+                            {% for item in items_rosas %}
+                            <option value="{{ item.id|unlocalize }}">{{ item.nombre }} (stock: {{ item.stock_actual }})</option>
+                            {% endfor %}
+                        </select>
+                        <input type="number" name="rosa_cantidad" class="form-input" min="0" step="1" placeholder="Cant.">
+                        <button type="button" onclick="this.closest('.fila-rosa').remove()">×</button>
+                    </div>
+                </template>
+        {% endif %}
+
         <p class="mostrando">Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ total_pedidos }} pedidos</p>
 
         <div class="pagination">
