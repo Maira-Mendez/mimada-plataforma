@@ -299,8 +299,7 @@ class AdminDashboardAccesoTest(TestCase):
 
 
 class CarruselYDestacadosDashboardAccesoTest(TestCase):
-    """Chequeo rápido de que el mismo patrón de permisos también
-    está aplicado en las otras 2 dashboards de admin."""
+
 
     def setUp(self):
         self.cliente = Usuario.objects.create_user(
