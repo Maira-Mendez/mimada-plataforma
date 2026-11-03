@@ -2,6 +2,7 @@ import json
 from datetime import date
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from usuarios.decorators import admin_requerido
 from .heuristica import (
     CONTENIDO_ROSAS, CONTENIDO_GIRASOLES, CONTENIDO_LIRIOS,
     alerta_stock_flor_fecha_comercial, alerta_stock_cinta_fecha_comercial,
@@ -90,7 +91,7 @@ def _armar_evento_actual(nodos, idx, historial, hoy):
     }
 
 
-@login_required
+@admin_requerido
 def dashboard(request):
     hoy = date.today()
     historial = cargar_historial()

@@ -6,9 +6,9 @@ from django.utils import timezone
 from pedidos.models import Pedido
 from .models import Abono
 from .forms import AbonoForm
+from usuarios.decorators import admin_requerido
 
-
-@login_required
+@admin_requerido
 def dashboard_view(request):
     pedidos = Pedido.objects.select_related('cliente').exclude(
         estado='CANCELADO'
@@ -75,7 +75,7 @@ def dashboard_view(request):
     return render(request, 'finanzas/dashboard.html', context)
 
 
-@login_required
+@admin_requerido
 def registrar_abono(request, pedido_id=None):
     initial = {}
     if pedido_id:

@@ -15,6 +15,7 @@ from asistente_ia.models import HistorialVentas
 from asistente_ia.fechas_comerciales import es_dia_comercial
 from asistente_ia.heuristica import inicio_semana
 from inventario.models import ItemInventario, DesglosePedidoFlores, DesgloseFlorItem
+from usuarios.decorators import admin_requerido
 from .forms import VentaPresencialForm
 
 Usuario = get_user_model()
@@ -30,6 +31,16 @@ ESTADO_TABS = [
     ('CANCELADO', 'Cancelados'),
 ]
 
+CATEGORIAS_DESGLOSE_FILAS = {
+    'rosa': 'rosas',
+    'peluche': 'peluches',
+    'papel': 'papel coreano',
+    'adicional': 'adicciones',
+}
+CATEGORIAS_DESGLOSE_SIMPLES = {
+    'girasoles': 'girasoles',
+    'lirios': 'lirios',
+}
 
 def _construir_contexto_lista(request):
     """Arma el contexto base del listado (filtros, paginación, detalle) —
@@ -126,7 +137,7 @@ def _descontar_inventario_flores(pedido, movimientos):
         DesgloseFlorItem.objects.create(desglose=desglose, item=item, cantidad=cantidad)
 
 
-@login_required
+@admin_requerido
 def lista_pedidos(request):
     context = _construir_contexto_lista(request)
     context['mostrar_form_presencial'] = request.GET.get('nueva') == '1'
@@ -139,7 +150,7 @@ def lista_pedidos(request):
     return render(request, 'pedidosadmin/lista.html', context)
 
 
-@login_required
+@admin_requerido
 def accion_pedido(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
     if request.method == 'POST':
@@ -176,7 +187,7 @@ def _decimal_o_none(valor):
     return d if d > 0 else None
 
 
-@login_required
+@admin_requerido
 def desglosar_flores(request, pk):
     """Formulario que aparece al marcar un pedido como LISTO: pide cuántas
     rosas de cada color, girasoles y lirios se van a usar, descuenta eso
@@ -215,7 +226,7 @@ def desglosar_flores(request, pk):
     })
 
 # Se mantiene por si acaso, como página completa alternativa
-@login_required
+@admin_requerido
 def detalle_pedido(request, pk):
 
     pedido = get_object_or_404(
@@ -276,7 +287,7 @@ def registrar_en_historial(nombre_producto, cantidad, fecha_venta):
     return registro
 
 
-@login_required
+@admin_requerido
 def registrar_venta_presencial(request):
     """Procesa el formulario del panel de 'Venta de vitrina'. Si es válido,
     crea el Pedido + DetallePedido, suma a HistorialVentas y — si se

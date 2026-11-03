@@ -7,6 +7,7 @@ from .forms import ProductoForm, ItemCarruselForm
 from inventario.models import ItemInventario, CategoriaInventario
 from .models import Producto, Categoria, ItemCarrusel, ProductoDelMes
 from .forms import ProductoForm, ItemCarruselForm, ProductoDelMesForm
+from usuarios.decorators import admin_requerido
 
 def inicio(request):
     productos_destacados = Producto.objects.all()
@@ -54,7 +55,7 @@ def detalle_producto(request, pk):
             'producto': producto,
         })
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def crear_producto(request):
 
     if not request.user.es_admin:
@@ -71,7 +72,7 @@ def crear_producto(request):
 
     return render(request, 'catalogo/crear_producto.html', {'form': form})
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def eliminar_producto(request, pk):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -84,7 +85,7 @@ def eliminar_producto(request, pk):
 
     return redirect('catalogo:admin_dashboard')
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def admin_dashboard(request):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -99,7 +100,7 @@ def admin_dashboard(request):
     }
 
     return render(request, 'catalogoadmin/dashboard.html', context)
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def editar_producto(request, pk):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -126,7 +127,7 @@ def editar_producto(request, pk):
         }
     )
 
-@login_required
+@admin_requerido
 def actualizar_listas(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     if request.method == 'POST':
@@ -140,7 +141,7 @@ def actualizar_listas(request, pk):
 
     return redirect('catalogo:admin_dashboard')
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def carrusel_dashboard(request):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -152,7 +153,7 @@ def carrusel_dashboard(request):
     })
 
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def crear_item_carrusel(request):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -172,7 +173,7 @@ def crear_item_carrusel(request):
     })
 
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def editar_item_carrusel(request, pk):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -193,7 +194,7 @@ def editar_item_carrusel(request, pk):
         'editar': True,
         'item': item,
     })
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def eliminar_item_carrusel(request, pk):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -205,7 +206,7 @@ def eliminar_item_carrusel(request, pk):
 def nosotros(request):
     return render(request, 'catalogo/nosotros.html')
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def destacados_mes_dashboard(request):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -217,7 +218,7 @@ def destacados_mes_dashboard(request):
     })
 
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def crear_producto_del_mes(request):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -237,7 +238,7 @@ def crear_producto_del_mes(request):
     })
 
 
-@login_required(login_url='usuarios:login')
+@admin_requerido
 def editar_producto_del_mes(request, pk):
     if not request.user.es_admin:
         raise PermissionDenied
@@ -260,8 +261,8 @@ def editar_producto_del_mes(request, pk):
     })
 
 
-@login_required(login_url='usuarios:login')
-@login_required(login_url='usuarios:login')
+
+@admin_requerido
 def eliminar_producto_del_mes(request, pk):
     if not request.user.es_admin:
         raise PermissionDenied

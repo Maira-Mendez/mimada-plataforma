@@ -5,11 +5,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+
+from usuarios.decorators import admin_requerido
 from .models import ItemInventario, CategoriaInventario
 from .forms import ItemInventarioForm, CategoriaInventarioForm
 
 
-@login_required
+@admin_requerido
 def inventario_dashboard(request):
     items = ItemInventario.objects.select_related('categoria').all()
 
@@ -34,7 +36,7 @@ def inventario_dashboard(request):
     return render(request, 'inventario/dashboard.html', context)
 
 
-@login_required
+@admin_requerido
 def item_crear(request):
     if request.method == 'POST':
         form = ItemInventarioForm(request.POST, request.FILES)
@@ -47,7 +49,7 @@ def item_crear(request):
     return render(request, 'inventario/item_form.html', {'form': form, 'titulo': 'Agregar Producto'})
 
 
-@login_required
+@admin_requerido
 def item_editar(request, pk):
     item = get_object_or_404(ItemInventario, pk=pk)
     if request.method == 'POST':
@@ -61,7 +63,7 @@ def item_editar(request, pk):
     return render(request, 'inventario/item_form.html', {'form': form, 'titulo': 'Editar Producto'})
 
 
-@login_required
+@admin_requerido
 def item_eliminar(request, pk):
     item = get_object_or_404(ItemInventario, pk=pk)
     if request.method == 'POST':
@@ -71,7 +73,7 @@ def item_eliminar(request, pk):
     return render(request, 'inventario/item_confirmar_eliminar.html', {'item': item})
 
 
-@login_required
+@admin_requerido
 def categoria_crear(request):
     if request.method == 'POST':
         form = CategoriaInventarioForm(request.POST)
@@ -83,7 +85,7 @@ def categoria_crear(request):
         form = CategoriaInventarioForm()
     return render(request, 'inventario/categoria_form.html', {'form': form})
 
-@login_required
+@admin_requerido
 def categoria_editar(request, pk):
     categoria = get_object_or_404(CategoriaInventario, pk=pk)
     if request.method == 'POST':
@@ -97,7 +99,7 @@ def categoria_editar(request, pk):
     return render(request, 'inventario/categoria_form.html', {'form': form})
 
 
-@login_required
+@admin_requerido
 def categoria_eliminar(request, pk):
     categoria = get_object_or_404(CategoriaInventario, pk=pk)
     if request.method == 'POST':

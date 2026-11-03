@@ -2,7 +2,10 @@
 from django.test import TestCase
 from .forms import LoginForm, RegistroForm
 from .models import Usuario
+from django.urls import reverse
+from django.contrib.auth import get_user_model
 
+Usuario = get_user_model()
 
 class RegistroFormTest(TestCase):
     def test_registro_valido(self):
@@ -69,3 +72,29 @@ class LoginFormTest(TestCase):
     def test_login_rechaza_contrasena_incorrecta(self):
         form = LoginForm(data={'username': 'ana@ejemplo.com', 'password': 'ClaveEquivocada'})
         self.assertFalse(form.is_valid())
+
+
+
+class AccesoAdminTest(TestCase):
+    RUTAS = ['inventario:dashboard', 'finanzas:dashboard',
+                 'pedidosadmin:dashboard', 'asistente_ia:dashboard']
+
+    def setUp(self):
+        self.cliente = Usuario.objects.create_user(
+            username='cliente@x.com', email='cliente@x.com', password='Clave12345')
+        self.admin = Usuario.objects.create_user(
+            username='admin@x.com', email='admin@x.com', password='Clave12345', es_admin=True)
+
+    def test_anonimo_es_redirigido_al_login(self):
+        for ruta in self.RUTAS:
+            self.assertEqual(self.client.get(reverse(ruta)).status_code, 302)
+
+    def test_cliente_recibe_403(self):
+        self.client.login(username='cliente@x.com', password='Clave12345')
+        for ruta in self.RUTAS:
+            self.assertEqual(self.client.get(reverse(ruta)).status_code, 403)
+
+    def test_admin_puede_entrar(self):
+        self.client.login(username='admin@x.com', password='Clave12345')
+        for ruta in self.RUTAS:
+            self.assertEqual(self.client.get(reverse(ruta)).status_code, 200)
