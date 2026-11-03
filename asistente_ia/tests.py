@@ -203,11 +203,7 @@ class FechasComercialesTests(SimpleTestCase):
         self.assertEqual(fc.detectar_fecha_comercial(date(2024, 12, 30), date(2025, 2, 20)), 'San Valentín')
 
     def test_evento_en_sabado_limite_coincide_con_ambas_semanas(self):
-        """Documenta el comportamiento ACTUAL: el rango es inclusivo en ambos
-        extremos, así que el Día del Amor y la Amistad (siempre sábado)
-        marca la semana que termina ese sábado Y la que empieza ese sábado.
-        El docstring dice que debería priorizarse la semana que venía
-        corriendo; si quieres ese comportamiento, este test debe cambiar."""
+
         sabado = fc.tercer_sabado_septiembre(2026)
         semana_previa = fc.detectar_fecha_comercial(sabado - timedelta(days=7), sabado)
         semana_nueva = fc.detectar_fecha_comercial(sabado, sabado + timedelta(days=7))
