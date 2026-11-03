@@ -89,10 +89,18 @@ class AccesoAdminTest(TestCase):
         for ruta in self.RUTAS:
             self.assertEqual(self.client.get(reverse(ruta)).status_code, 302)
 
-    def test_cliente_recibe_403(self):
+    def test_cliente_es_redirigido_al_login_admin(self):
         self.client.login(username='cliente@x.com', password='Clave12345')
+
         for ruta in self.RUTAS:
-            self.assertEqual(self.client.get(reverse(ruta)).status_code, 403)
+            response = self.client.get(reverse(ruta))
+
+            self.assertEqual(response.status_code, 302)
+            self.assertRedirects(
+                response,
+                reverse('usuarios:login_admin'),
+                fetch_redirect_response=False
+            )
 
     def test_admin_puede_entrar(self):
         self.client.login(username='admin@x.com', password='Clave12345')

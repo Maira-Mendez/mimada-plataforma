@@ -13,7 +13,8 @@ Usuario = get_user_model()
 
 
 def crear_usuario(username='admin1', email='admin1@mimada.com', password='clave12345'):
-    return Usuario.objects.create_user(username=username, email=email, password=password)
+    return Usuario.objects.create_user(username=username, email=email, password=password,
+        es_admin=True)
 
 
 def crear_cliente(username='cliente1', email='cliente1@mimada.com', first_name='Lucia'):

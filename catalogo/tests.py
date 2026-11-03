@@ -289,7 +289,7 @@ class AdminDashboardAccesoTest(TestCase):
     def test_admin_dashboard_prohibido_si_no_es_admin(self):
         self.client.login(username='cliente@ejemplo.com', password='ClaveSegura123')
         response = self.client.get(reverse('catalogo:admin_dashboard'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
 
     def test_admin_dashboard_ok_si_es_admin(self):
         self.client.login(username='admin@ejemplo.com', password='ClaveSegura123')
@@ -315,7 +315,7 @@ class CarruselYDestacadosDashboardAccesoTest(TestCase):
     def test_carrusel_dashboard_prohibido_si_no_es_admin(self):
         self.client.login(username='cliente2@ejemplo.com', password='ClaveSegura123')
         response = self.client.get(reverse('catalogo:carrusel_dashboard'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
 
     def test_carrusel_dashboard_ok_si_es_admin(self):
         self.client.login(username='admin2@ejemplo.com', password='ClaveSegura123')
@@ -325,7 +325,7 @@ class CarruselYDestacadosDashboardAccesoTest(TestCase):
     def test_destacados_mes_dashboard_prohibido_si_no_es_admin(self):
         self.client.login(username='cliente2@ejemplo.com', password='ClaveSegura123')
         response = self.client.get(reverse('catalogo:destacados_mes_dashboard'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
 
     def test_destacados_mes_dashboard_ok_si_es_admin(self):
         self.client.login(username='admin2@ejemplo.com', password='ClaveSegura123')
