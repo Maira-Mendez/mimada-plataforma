@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Asistente IA · Mimada Admin</title>
+  <title>Pronostico · Mimada Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
 
@@ -350,7 +350,7 @@
       <a href="{% url 'finanzas:dashboard' %}" class="nav-link">
         <span class="nav-icon"></span> Finanzas
       </a>
-      <a href="{% url 'asistente_ia:dashboard' %}" class="nav-link active">
+      <a href="{% url 'pronostico:dashboard' %}" class="nav-link active">
         <span class="nav-icon"></span> Pronostico
       </a>
 
@@ -367,7 +367,7 @@
   <main class="main">
     <div class="main__header">
       <div>
-        <h1 class="main__titulo">Asistente IA · Predicción de Insumos</h1>
+        <h1 class="main__titulo">Pronostico · Predicción de Insumos</h1>
         <p class="main__subtitulo">
           {% if nombre_fecha_proxima %}
             Próxima fecha comercial: {{ nombre_fecha_proxima }}{% if fecha_proxima %} · {{ fecha_proxima|date:"d/m/Y" }}{% endif %}

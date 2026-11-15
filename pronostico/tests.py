@@ -9,11 +9,11 @@ from django.contrib.auth import get_user_model
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from asistente_ia import fechas_comerciales as fc
-from asistente_ia import heuristica
-from asistente_ia import views as vistas
-from asistente_ia.holt import holt_pronostico, serie_anual_evento
-from asistente_ia.models import HistorialVentas
+from pronostico import fechas_comerciales as fc
+from pronostico import heuristica
+from pronostico import views as vistas
+from pronostico.holt import holt_pronostico, serie_anual_evento
+from pronostico.models import HistorialVentas
 from inventario.models import CategoriaInventario, ItemInventario
 
 
@@ -800,7 +800,7 @@ class DashboardViewTests(TestCase):
     HOY = date(2026, 1, 20)
 
     def setUp(self):
-        self.url = reverse('asistente_ia:dashboard')
+        self.url = reverse('pronostico:dashboard')
 
     def get(self, params=None, proxima=(None, None)):
         """GET al dashboard como admin, con fecha congelada."""

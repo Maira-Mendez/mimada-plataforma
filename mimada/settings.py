@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'finanzas',
     'inventario',
     'pedidosadmin',
-    'asistente_ia',
+    'pronostico',
 ]
 
 MIDDLEWARE = [

@@ -2,7 +2,7 @@ from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from .models import Pedido
-from asistente_ia.utils import registrar_venta
+from pronostico.utils import registrar_venta
 
 
 @receiver(pre_save, sender=Pedido)
