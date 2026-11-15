@@ -161,4 +161,4 @@ def dashboard(request):
         'evento_actual': evento_actual,
         'nav': nav,
     }
-    return render(request, 'asistente_ia/dashboard.html', context)
+    return render(request, 'pronostico/dashboard.html', context)

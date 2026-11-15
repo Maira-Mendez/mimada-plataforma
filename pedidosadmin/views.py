@@ -11,9 +11,9 @@ from django.db.models import Q
 from django.urls import reverse
 
 from pedidos.models import Pedido, DetallePedido
-from asistente_ia.models import HistorialVentas
-from asistente_ia.fechas_comerciales import es_dia_comercial
-from asistente_ia.heuristica import inicio_semana
+from pronostico.models import HistorialVentas
+from pronostico.fechas_comerciales import es_dia_comercial
+from pronostico.heuristica import inicio_semana
 from inventario.models import ItemInventario, DesglosePedidoFlores, DesgloseFlorItem
 from usuarios.decorators import admin_requerido
 from .forms import VentaPresencialForm

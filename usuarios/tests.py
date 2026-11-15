@@ -77,7 +77,7 @@ class LoginFormTest(TestCase):
 
 class AccesoAdminTest(TestCase):
     RUTAS = ['inventario:dashboard', 'finanzas:dashboard',
-                 'pedidosadmin:dashboard', 'asistente_ia:dashboard']
+                 'pedidosadmin:dashboard', 'pronostico:dashboard']
 
     def setUp(self):
         self.cliente = Usuario.objects.create_user(
